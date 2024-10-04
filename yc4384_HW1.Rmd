@@ -2,23 +2,27 @@
 title: "yc4384_Yangyang_Chen_HW1"
 author: "Yangyang Chen"
 date: "2024-09-20"
-output: pdf_document
+output: 
+  pdf_document:
+    latex_engine: xelatex
 ---
+```{r, echo=TRUE, include=FALSE, warning=FALSE, message=FALSE}
+library(survival)
+library(tidyverse)
+library(ggplot2)
+library(knitr)
+library(km.ci)
+library(survminer)
+```
 
 ## Question 1
- a) Using the data above, calculate the maximum likelihood estimator of the parameter \( \lambda \) for time to relapse and time to death assuming an exponential distribution:
+a) Using the data above, calculate the maximum likelihood estimator of the parameter \( \lambda \) for time to relapse and time to death assuming an exponential distribution:
 $$f(t) = \lambda e^{-\lambda t}$$
 Write a brief sentence interpreting this parameter.
 
 Solution:
 
-For an exponential distribution, the probability density function is:
-
-$$
-f(t; \lambda) = \lambda e^{-\lambda t}
-$$
-
-The likelihood function and log-likelihood function for \( T_1, T_2, \dots, T_n \) are:
+The likelihood functions are:
 
 $$
 L(\lambda) = \prod_{i=1}^{n} \lambda e^{-\lambda T_i} = \lambda^n e^{-\lambda \sum_{i=1}^{n} T_i}
@@ -28,7 +32,7 @@ $$
 \log L(\lambda) = n \log \lambda - \lambda \sum_{i=1}^{n} T_i
 $$
 
-To maximize the likelihood, differentiate \( \log L(\lambda) \) with respect to \( \lambda \) and set it equal to zero:
+Maximizing the likelihood:
 
 $$
 \frac{d}{d\lambda} \log L(\lambda) = \frac{n}{\lambda} - \sum_{i=1}^{n} T_i = 0
@@ -38,34 +42,30 @@ $$
 \hat{\lambda} = \frac{n}{\sum_{i=1}^{n} T_i}
 $$
 
-Given relapse data:
+Time to relapse:
 
-- \( n = 10 \)
-- Relapse times: \( 5, 8, 12, 24, 32, 17, 16, 17, 19, 30 \)
-- \( \sum T_i = 180 \)
+$$ n = 6 $$
 
-Substitute into the MLE formula, we obtain:
+$$\sum T_i = 180$$
 
 $$
-\hat{\lambda}_{\text{relapse}} = \frac{10}{180} = 0.0556
+\hat{\lambda}_{\text{r}} = \frac{6}{180} \approx 0.033
 $$
+Time to death:
 
-Similarly, given:
+$$n = 3$$
 
-- Death times: \( 10, 12, 15, 33, 45, 28, 16, 17, 19, 30 \)
-- \( \sum T_i = 225 \)
-
-we have:
+$$\sum T_i = 225$$
 
 $$
-\hat{\lambda}_{\text{death}} = \frac{10}{225} = 0.0444
+\hat{\lambda}_{\text{d}} = \frac{3}{225} \approx 0.013
 $$
 
 Interpretation:
 
-- The MLE for \( \lambda \) for the time to relapse is \( \hat{\lambda}_{\text{relapse}} = 0.0556 \), indicating that approximately 5.56% of patients relapse each month, and the expected time to relapse is \( \frac{1}{0.0556} \approx 18 \) months.
+- The MLE for the time to relapse is \( \hat{\lambda}_{\text{r}} = 0.033 \), indicating that approximately 3.3% of patients relapse each month.
 
-- The MLE for \( \lambda \) for the time to death is \( \hat{\lambda}_{\text{death}} = 0.0444 \), meaning that approximately 4.44% of patients die each month, and the expected time to death is \( \frac{1}{0.0444} \approx 22.5 \) months.
+- The MLE for the time to death is \( \hat{\lambda}_{\text{d}} = 0.013 \), meaning that approximately 1.3% of patients die each month.
 
  b) Now you will see how powerful this single parameter can be! Using this parameter estimate (round to 3 decimal places), estimate the following quantities:
 
@@ -73,54 +73,56 @@ Interpretation:
 
 Solution: 
 
-The mean of an exponential distribution is given by:
+The mean time to relapse is:
 
 $$
-E(T) = \frac{1}{\lambda}
+E(T_{\text{r}}) = \frac{1}{0.033} \approx30.303 \text{ months}
 $$
 
-Using the MLE for the relapse rate \( \hat{\lambda}_{\text{relapse}} = 0.0556 \), the mean time to relapse is:
+The mean survival time to death is:
 
 $$
-E(T_{\text{relapse}}) = \frac{1}{0.0556} \approx 18.007 \text{ months}
-$$
-
-Using the MLE for the death rate \( \hat{\lambda}_{\text{death}} = 0.0444 \), the mean survival time is:
-
-$$
-E(T_{\text{death}}) = \frac{1}{0.0444} \approx 22.523 \text{ months}
+E(T_{\text{d}}) = \frac{1}{0.013}\approx 76.923 \text{ months}
 $$
 
 (ii) The median time to relapse and median survival time after bone marrow transplant.
 
 Solution:
 
-Using the CDF of the exponential distribution:
 
 $$
 1 - e^{-\lambda t_{\text{median}}} = 0.5
 $$
 
-Therefore, the median of the exponential distribution is:
 $$
-t_{\text{median}} = \frac{\log(2)}{\lambda}
-$$
-
-Since the MLE for the relapse rate \( \hat{\lambda}_{\text{relapse}} = 0.0556 \), the median time to relapse is:
-
-$$
-\text{Median}(T_{\text{relapse}}) = \frac{\log(2)}{0.0556} \approx 12.47 \text{ months}
+t_{\text{median}} = \frac{-\log(0.5)}{\lambda}
 $$
 
-Similarly, the median survival time is:
+The median time to relapse is:
 
 $$
-\text{Median}(T_{\text{death}}) = \frac{\log(2)}{0.0444} \approx 15.62 \text{ months}
+\text{Median}(T_{\text{r}}) = \frac{-\log(0.5)}{0.033} \approx 21.004 \text{ months}
+$$
+
+The median survival time to death is:
+
+$$
+\text{Median}(T_{\text{d}}) = \frac{-\log(0.5)}{0.013} \approx 53.319 \text{ months}
 $$
 
 (iii) The one-year and two-year probabilities of remaining relapse-free and surviving: \( S_R(12) \) and \( S_R(24) \) for relapse, and \( S_D(12) \) and \( S_D(24) \) for death.
 
 Solution:
+
+```{r, echo=TRUE, results='hide', warning=FALSE, message=FALSE}
+lambda_rl = 6/(5+8+12+24+32+17+16+17+19+30)
+sr12 = exp(-lambda_rl*12)
+sr24 = exp(-lambda_rl*24)
+
+lambda_d = 3/(10+12+15+33+45+28+16+17+19+30)
+sd12 = exp(-lambda_d*12)
+sd24 = exp(-lambda_d*24)
+```
 
 Given:
 
@@ -128,76 +130,61 @@ $$
 S(t) = P(T > t) = e^{-\lambda t}
 $$
 
-Using the MLE for the relapse rate \( \hat{\lambda}_{\text{relapse}} = 0.0556 \), we calculate the probabilities of remaining relapse-free:
+The probabilities of remaining relapse-free:
 
 \[
-S_R(12) = e^{-\hat{\lambda}_{\text{relapse}} \cdot 12} = e^{-0.0556 \cdot 12}
+S_R(12) = e^{-\hat{\lambda}_{\text{r}} \cdot 12} = e^{-0.033 \cdot 12} = `r round(sr12, 3)`
+\] 
+
+\[
+S_R(24) = e^{-\hat{\lambda}_{\text{r}} \cdot 24} = e^{-0.033 \cdot 24}
+= `r round(sr24, 3)`
+\]
+
+The survival probabilities:
+
+\[
+S_D(12) = e^{-\hat{\lambda}_{\text{d}} \cdot 12} = e^{-0.013 \cdot 12}
+= `r round(sd12, 3)`
 \]
 
 \[
-S_R(24) = e^{-\hat{\lambda}_{\text{relapse}} \cdot 24} = e^{-0.0556 \cdot 24}
-\]
-
-Similarly, using the MLE for the death rate \( \hat{\lambda}_{\text{death}} = 0.0444 \), we obtain the survival probabilities:
-
-\[
-S_D(12) = e^{-\hat{\lambda}_{\text{death}} \cdot 12} = e^{-0.0444 \cdot 12}
-\]
-
-\[
-S_D(24) = e^{-\hat{\lambda}_{\text{death}} \cdot 24} = e^{-0.0444 \cdot 24}
+S_D(24) = e^{-\hat{\lambda}_{\text{d}} \cdot 24} = e^{-0.013 \cdot 24}
+= `r round(sd24, 3)`
 \]
 
 (iv) The cumulative probabilities of relapse and death by one and two years (based on the CDF, \( F(t) \)).
 
 Solution:
 
-Since the CDF of an exponential distribution is:
+The cumulative probability of relapse is:
 
-$$
-F(t) = 1 - e^{-\lambda t}
-$$
+$$F_R(12)= 1 - S_R(12) = 1 - `r sr12` = `r round(1 - sr12, 3)`$$    
+$$F_R(24)= 1 - S_R(24) = 1 - `r sr24` = `r round(1 - sr24, 3)`$$    
 
-Using the MLE for the relapse rate \( \hat{\lambda}_{\text{relapse}} = 0.0556 \), the cumulative probability of relapse is:
+The cumulative probability of death is:
 
-\[
-F_R(12) = 1 - e^{-\hat{\lambda}_{\text{relapse}} \cdot 12} = 1 - e^{-0.0556 \cdot 12}
-\]
+$$F_D(12)= 1 - S_D(12) = 1 - `r sd12` = `r round(1 - sd12, 3)`$$ 
+$$F_D(24)= 1 - S_D(24) = 1 - `r sd24` = `r round(1 - sd24, 3)`$$ 
 
-\[
-F_R(24) = 1 - e^{-\hat{\lambda}_{\text{relapse}} \cdot 24} = 1 - e^{-0.0556 \cdot 24}
-\]
-
-Similarly, using the MLE for the death rate \( \hat{\lambda}_{\text{death}} = 0.0444 \), the cumulative probability of death is:
-
-\[
-F_D(12) = 1 - e^{-\hat{\lambda}_{\text{death}} \cdot 12} = 1 - e^{-0.0444 \cdot 12}
-\]
-
-\[
-F_D(24) = 1 - e^{-\hat{\lambda}_{\text{death}} \cdot 24} = 1 - e^{-0.0444 \cdot 24}
-\]
-
-(iv) Based on the exponential distribution with \( \hat{\lambda} \) as calculated in (a), calculate the conditional probability of being relapse-free after 2 years given that one has remained relapse-free for at least one year. How does this compare with the probability of remaining relapse-free one year after bone marrow transplant calculated in part (iii)?
+(v) Based on the exponential distribution with \( \hat{\lambda} \) as calculated in (a), calculate the conditional probability of being relapse-free after 2 years given that one has remained relapse-free for at least one year. How does this compare with the probability of remaining relapse-free one year after bone marrow transplant calculated in part (iii)?
 
 Solution:
-
-Simplify the conditional probability:
 
 $$
 P(T > 24 \mid T > 12) = \frac{P(T > 24)}{P(T > 12)} = \frac{S(24)}{S(12)} = \frac{e^{-\lambda \cdot 24}}{e^{-\lambda \cdot 12}} = e^{-\lambda \cdot (24 - 12)} = e^{-\lambda \cdot 12}
 $$
 
-Since the MLE for the relapse rate \( \hat{\lambda}_{\text{relapse}} = 0.0556 \), we have:
+Since \( \hat{\lambda}_{\text{r}} \approx 0.033 \), we obtain:
 
 \[
-P(T > 24 \mid T > 12) = e^{-0.0556 \cdot 12}
+P(T > 24 \mid T > 12) = e^{-0.033 \cdot 12} =  `r round(sr24/sr12, 3)` 
 \]
 
-From part (iii), the probability of remaining relapse-free one year after bone marrow transplant is:
+From part (iii), the probability of remaining relapse-free is:
 
 \[
-S(12) = e^{-0.0556 \cdot 12} = P(T > 24 \mid T > 12)
+S(12) = e^{-0.033 \cdot 12} = P(T > 24 \mid T > 12) = `r round(sr24/sr12, 3)` 
 \]
 
 Therefore, the conditional probability of remaining relapse-free after 2 years, given relapse-free for 1 year, is exactly the same as the probability of remaining relapse-free after 1 year. This is due to the memoryless property of the exponential distribution.
@@ -207,27 +194,261 @@ Therefore, the conditional probability of remaining relapse-free after 2 years, 
 Solution:
 
 
-Yes, it is possible. The Kaplan-Meier estimator is widely used to estimate survival functions when censoring is present and does not rely on any specific parametric distribution.
-
-To compute the Kaplan-Meier estimates and the median times, we can use the `survival` package in R. Here's the code:
+Yes, it is possible. The Kaplan-Meier estimator is used to estimate survival functions and does not rely on any parametric distribution.
 
 ```{r}
-library(survival)
+relapse_t = c(5, 8, 12, 24, 32, 17, 16, 17, 19, 30)
+relapse_s = c(1, 1, 1, 1, 1, 1, 0, 0, 0, 0)
 
-relapse_times <- c(5, 8, 12, 24, 32, 17, 16, 17, 19, 30)
-relapse_status <- c(1, 1, 1, 1, 1, 1, 0, 0, 0, 0)  # 1 = event (relapse), 0 = censored
+death_t = c(10, 12, 15, 33, 45, 28, 16, 17, 19, 30)
+death_s = c(1, 1, 1, 1, 0, 0, 0, 0, 0, 0)
 
-death_times <- c(10, 12, 15, 33, 45, 28, 16, 17, 19, 30)
-death_status <- c(1, 1, 1, 1, 0, 0, 0, 0, 0, 0)  # 1 = event (death), 0 = censored
+km_relapse = survfit(Surv(relapse_t, relapse_s) ~ 1)
+med_relapse = summary(km_relapse)$table["median"]
 
-# Kaplan-Meier estimate for relapse
-km_relapse <- survfit(Surv(relapse_times, relapse_status) ~ 1)
-median_time_relapse <- summary(km_relapse)$table["median"]
+km_death = survfit(Surv(death_t, death_s) ~ 1)
+med_death = summary(km_death)$table["median"]
 
-# Kaplan-Meier estimate for death
-km_death <- survfit(Surv(death_times, death_status) ~ 1)
-median_time_death <- summary(km_death)$table["median"]
+med_df = data.frame(
+  Outcome = c("Relapse", "Death"),
+  Median_Time = c(med_relapse, med_death)
+)
 
-median_time_relapse
-median_time_death
+knitr::kable(med_df, col.names = c("Outcome", "Median Survival Time"))
 ```
+
+## Question 2
+a) 
+$t_j$: distinct death or censoring times  
+$d_j$: the number of death at $t_j$  
+$r_j$: the number of individuals at risk right before the $j$-th death time  
+$c_j$: the number of censored observations between the $j$-th and $(j+1)$-st death time   
+
+|$t_j$|$d_j$|$c_j$|$r_j$|$1-(d_j/r_j)$|$\hat{S}(t_j)$|
+|--------|-----|-----|-----|-------------|-----------------|
+|2|1|0|17|`r round(1-1/17,3)`|`r round(1-1/17,3)`|
+|3|1|0|16|`r round(1-1/16,3)`|`r round((1-1/17)*(1-1/16),3)`|
+|4|1|0|15|`r round(1-1/15,3)`|`r round((1-1/17)*(1-1/16)*(1-1/15),3)`|
+|12|1|0|14|`r round(1-1/14,3)`|`r round((1-1/17)*(1-1/16)*(1-1/15)*(1-1/14),3)`|
+|22|1|0|13|`r round(1-1/13,3)`|`r round((1-1/17)*(1-1/16)*(1-1/15)*(1-1/14)*(1-1/13),3)`|
+|48|1|0|12|`r round(1-1/12,3)`|`r round((1-1/17)*(1-1/16)*(1-1/15)*(1-1/14)*(1-1/13)*(1-1/12),3)`|
+|51|0|1|11|1|`r round((1-1/17)*(1-1/16)*(1-1/15)*(1-1/14)*(1-1/13)*(1-1/12),3)`|
+|56|0|1|10|1|`r round((1-1/17)*(1-1/16)*(1-1/15)*(1-1/14)*(1-1/13)*(1-1/12),3)`|
+|80|1|0|9|`r round(1-1/9,3)`|`r round((1-1/17)*(1-1/16)*(1-1/15)*(1-1/14)*(1-1/13)*(1-1/12)*(1-1/9),3)`|
+|85|1|0|8|`r round(1-1/8,3)`|`r round((1-1/17)*(1-1/16)*(1-1/15)*(1-1/14)*(1-1/13)*(1-1/12)*(1-1/9)*(1-1/8),3)`|
+|90|1|0|7|`r round(1-1/7,3)`|`r round((1-1/17)*(1-1/16)*(1-1/15)*(1-1/14)*(1-1/13)*(1-1/12)*(1-1/9)*(1-1/8)*(1-1/7),3)`|
+|94|0|1|6|1|`r round((1-1/17)*(1-1/16)*(1-1/15)*(1-1/14)*(1-1/13)*(1-1/12)*(1-1/9)*(1-1/8)*(1-1/7),3)`|
+|160|1|0|5|`r round(1-1/5,3)`|`r round((1-1/17)*(1-1/16)*(1-1/15)*(1-1/14)*(1-1/13)*(1-1/12)*(1-1/9)*(1-1/8)*(1-1/7)*(1-1/5),3)`|
+|171|1|0|4|`r round(1-1/4,3)`|`r round((1-1/17)*(1-1/16)*(1-1/15)*(1-1/14)*(1-1/13)*(1-1/12)*(1-1/9)*(1-1/8)*(1-1/7)*(1-1/5)*(1-1/4),3)`|
+|180|1|1|3|`r round(1-1/3,3)`|`r round((1-1/17)*(1-1/16)*(1-1/15)*(1-1/14)*(1-1/13)*(1-1/12)*(1-1/9)*(1-1/8)*(1-1/7)*(1-1/5)*(1-1/4)*(1-1/3),3)`|
+|238|1|0|1|0|0|
+
+b) Repeat the above estimation of \( \hat{S}(t) \) using any software you choose. Also calculate pointwise 95% confidence intervals for \( \hat{S}(t) \) using the "log-log" approach and the linear approach. Do either of the approaches result in lower or upper confidence bounds outside the \([0,1]\) interval?
+
+Solution:
+
+```{r echo=T}
+df2 = data.frame(
+  t = c(2,3,4,12,22,48,51,56,80,85,90,94,160,171,180,180,238),
+  c = c(1,1,1,1,1,1,0,0,1,1,1,0,1,1,1,0,1) # 1: event, 0: censored
+)
+
+surv = Surv(df2$t, df2$c)
+km = survfit(surv ~ 1)
+
+l_loglog = km.ci(km, method = "loglog")$lower
+u_loglog = km.ci(km, method = "loglog")$upper
+
+l_linear = km.ci(km, method = "linear")$lower
+u_linear = km.ci(km, method = "linear")$upper
+
+tb = data.frame(
+  t = round(km$time,3), # time
+  st = round(km$surv,3), # survival
+  l_loglog = round(l_loglog, 3),
+  u_loglog = round(u_loglog, 3),
+  l_linear = round(l_linear, 3),
+  u_linear = round(u_linear, 3)
+)
+kable(tb, col.names = c("t", "S(t)", "Lower 95%CI (log-log)", "Upper 95%CI (log-log)", "Lower 95%CI (linear)", "Upper 95%CI (linear)"))
+```
+
+Conclusion:
+
+Log-log approach returns CIs within $[0,1]$, but linear approach returns some values outside $[0,1]$.
+
+c) Plot the estimated survival function \( \hat{S}(t) \) and pointwise 95% confidence intervals, by hand or using any statistical software package.
+
+```{r}
+times = c(22, 2, 48, 85, 160, 238, 56, 94, 51, 12, 171, 80, 180, 4, 90, 180, 3)
+censoring = c(FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, TRUE, FALSE)
+
+data = data.frame(times = times, censoring = censoring)
+surv_obj = Surv(data$times, event = !data$censoring)
+
+km_fit = survfit(surv_obj ~ 1, data = data)
+
+ggsurvplot(
+  km_fit, 
+  data = data,               
+  conf.int = TRUE, 
+  conf.int.style = "ribbon",
+  conf.int.alpha = 0.2, 
+  conf.int.type = "log-log",    
+  ggtheme = theme_minimal(),
+  risk.table = TRUE,
+  title = "Kaplan-Meier Estimate with Log-Log 95% Confidence Intervals"
+)
+```
+
+d) Provide the estimated median survival, along with the estimated 25th and 75th percentiles (when possible). Indicate where these percentiles fall on your KM plot from (c) by drawing horizontal lines. What are the actual KM survival estimates corresponding to each of these estimated percentiles?
+
+Solution:
+
+```{r}
+median_survival = summary(km_fit)$table["median"]
+percentiles = quantile(km_fit, probs = c(0.25, 0.75))
+```
+
+```{r}
+km_plot = ggsurvplot(
+  km_fit, 
+  data = data,                 # Provide the original data
+  conf.int = TRUE, 
+  conf.int.style = "ribbon",
+  conf.int.alpha = 0.2, 
+  conf.int.type = "log-log",    # Log-log confidence intervals
+  ggtheme = theme_minimal(),
+  risk.table = TRUE,
+  title = "Kaplan-Meier Estimate with Median, 25th, and 75th Percentiles"
+)
+
+km_plot$plot +
+  geom_hline(yintercept = 0.5, linetype = "dashed", color = "red") + 
+  geom_hline(yintercept = 0.75, linetype = "dotted", color = "blue") + 
+  geom_hline(yintercept = 0.25, linetype = "dotted", color = "green") 
+
+```
+
+The actual Kaplan-Meier survival estimates for the 25th, 50th, and 75th percentiles are as follows:
+- 25th percentile: Survival estimate = 0.705
+- 50th percentile (median): Survival estimate = 0.431
+- 75th percentile: Survival estimate = 0.172
+(e)
+```{r}
+km_summary = summary(km_fit)
+survival_prob = km_summary$surv  # S(t)
+cumulative_hazard = -log(survival_prob)
+result = data.frame(
+  time = km_summary$time,
+  survival_estimate = survival_prob,
+  cumulative_hazard = cumulative_hazard
+)
+
+```
+| $t_j$ | 2   | 3   | 4   | 12  | 22  | 48  | 51  | 56  | 80  | 85  | 90  | 94  | 160 | 171 | 180 | 238 |
+|-----------|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|
+| $\hat{\Lambda}_{KM}(t)$ | `r round(-log(km_fit$surv)[1], 3)` | `r round(-log(km_fit$surv)[2], 3)` | `r round(-log(km_fit$surv)[3], 3)` | `r round(-log(km_fit$surv)[4], 3)` | `r round(-log(km_fit$surv)[5], 3)` | `r round(-log(km_fit$surv)[6], 3)` | `r round(-log(km_fit$surv)[7], 3)` | `r round(-log(km_fit$surv)[8], 3)` | `r round(-log(km_fit$surv)[9], 3)` | `r round(-log(km_fit$surv)[10], 3)` | `r round(-log(km_fit$surv)[11], 3)` | `r round(-log(km_fit$surv)[12], 3)` | `r round(-log(km_fit$surv)[13], 3)` | `r round(-log(km_fit$surv)[14], 3)` | `r round(-log(km_fit$surv)[15], 3)` | `r round(-log(km_fit$surv)[16], 3)` |
+(f)
+```{r}
+cox_fit = coxph(surv_obj ~ 1, data = data)
+na_cumulative_hazard = basehaz(cox_fit, centered = FALSE)
+hazard_df = data.frame(
+  Time = na_cumulative_hazard$time,
+  Hazard = na_cumulative_hazard$hazard |> round(3)
+)
+
+knitr::kable(hazard_df, col.names = c("$t_j$", "$\\hat{\\Lambda}_{NA}(t)$"), escape = FALSE)
+
+```
+
+(g)
+```{r, warning=FALSE}
+cox_fit = coxph(surv_obj ~ 1, data = data)
+
+na_cumulative_hazard = basehaz(cox_fit, centered = FALSE)
+
+ggplot(na_cumulative_hazard, aes(x = time, y = hazard)) +
+  geom_step() +
+  labs(title = "Cumulative Hazard expression(hat(Lambda)(t)) vs t", x = "Time", y = "expression(hat(Lambda)(t)))") +
+  theme_minimal()
+
+ggplot(na_cumulative_hazard, aes(x = log(time), y = log(hazard))) +
+  geom_step() +
+  labs(title = "Log Cumulative Hazard log(Λ(t)) vs log(t)", x = "log(t)", y = "expression(log(hat(Lambda)(t)))") +
+  theme_minimal()
+```
+Plot (i) exhibits deviations from linearity in the cumulative hazard function, whereas plot (ii) displays a more linear trend. This observation suggests that the Weibull model may offer a better fit for the data, as it is more consistent with the linear behavior observed in the cumulative hazard function.
+
+(h)
+```{r}
+na_cumulative_hazard$survival_FH = exp(-na_cumulative_hazard$hazard)
+
+comparison = data.frame(
+  time = km_fit$time,
+  NA_survival = na_cumulative_hazard$hazard |> round(3),
+  KM_survival = km_fit$surv |> round(3),
+  FH_survival = na_cumulative_hazard$survival_FH[match(km_fit$time,
+                                                  na_cumulative_hazard$time)] |> round(3)
+)
+
+knitr::kable(comparison, col.names = c("$t_j$", "$\\hat{\\Lambda}_{NA}(t)$", "$\\hat{S}(t_j)$", "$\\hat{S}_{FH}(t_j)$"), escape = FALSE)
+```
+Overall, the agreement between the Kaplan-Meier and Fleming-Harrington survival estimates is very good, with only small differences observed. These differences are expected due to the distinct methodologies underlying the two estimators, but they do not substantially impact the overall survival trend in this dataset. Both estimators provide reliable estimates of the survival function.
+
+## Question 3.
+
+(a)
+
+```{r}
+intervals = cut(data$times, breaks = seq(0, max(data$times) + 30, by = 30), right = FALSE) |> levels()
+
+rj = c(17, 12, 9, 7, 5, 5, 3, 1)|> round(3)
+dj = c(5, 1, 2, 1, 0, 2, 1, 1) |> round(3)
+
+data.frame(
+  time_interval = intervals,
+  rj,
+  cj = c(0, 2, 0, 1, 0, 0, 1, 0)|> round(3),
+  dj,
+  sr = cumprod(1 - dj/rj)
+) |> 
+  knitr::kable(col.names = c("Time Intervals", "$r_j$","$c_j$", "$d_j$","$\\hat{S}(t)$"), escape = FALSE)
+```
+
+(b)
+```{r}
+
+lifetable_fit = survfit(surv_obj ~ 1, data = data, type = "fleming-harrington", timefix = FALSE)
+
+lifetable_summary = summary(lifetable_fit)
+interval_midpoints = (lifetable_summary$time + c(0, lifetable_summary$time[-length(lifetable_summary$time)])) / 2
+
+hazard_function = lifetable_summary$n.event / (lifetable_summary$n.risk * 30) 
+hazard_data = data.frame(
+  interval_midpoint = interval_midpoints,
+  hazard = hazard_function
+)
+
+ggplot(hazard_data, aes(x = interval_midpoint, y = hazard)) +
+  geom_step() +
+  labs(title = "Hazard Function at Midpoints of Intervals", x = "Time (days)", y = "Hazard") +
+  theme_minimal()
+```
+
+(c)
+
+From the plot, since the hazard function is increasing and not constant, an exponential model does not seem appropriate for this data. Instead, a model that allows for a time-varying hazard, such as a Weibull or Cox proportional hazards model, might be more suitable for capturing the behavior of the hazard over time.
+
+## Question 4.
+1)	Brinkhof et al. (2010):
+
+Main Concern: The authors worried that non-informative censoring, which assumes equal mortality risk for those lost to follow-up and those in care, underestimated mortality, as higher rates were found in those lost to follow-up.
+
+Steps Taken: They used multiple imputation and hazard ratios to estimate survival for patients lost to follow-up, conducting sensitivity analyses with varying assumed hazard ratios to account for higher mortality.
+	
+2)	Braitstein et al. (2011):
+	
+Main Concern: The authors feared that mortality was underestimated in HIV-positive and HIV-exposed children lost to follow-up due to stigma and fear of discrimination.
+
+Steps Taken: Braitstein et al. conducted a prospective evaluation, tracing over 80% of lost children with community health workers, revealing that many had died, confirming underestimated mortality. Stigma and disclosure issues were key factors in non-informative censoring.
